@@ -42,10 +42,11 @@
                     <hz:multicast enabled="true"/>
                 </hz:join>
             </hz:network>
+
         </hz:config>
     </hz:hazelcast>
 
-    <hz:map id="map" instance-ref="client" name="map" scope="singleton"/>
+	<hz:map id="map" instance-ref="client" name="map" scope="singleton"/>
     <hz:client id="client">
         <hz:group name="${name}" password="${password}"/>
         <hz:network>
