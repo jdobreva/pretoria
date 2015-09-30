@@ -5,8 +5,10 @@
            http://www.springframework.org/schema/rabbit/spring-rabbit-1.5.xsd
            http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd">
+           
+	<bean id="mainContainerListener" class="com.estafet.pretoria.rabbit.config.MockedContextMessageListener"/>
 
-	<rabbit:connection-factory id="connectionFactory" host="localhost" username="guest" password="guest" channel-cache-size="25" cache-mode="CONNECTION" />	
+	<rabbit:connection-factory id="connectionFactory" host="localhost" username="guest" password="guest" cache-mode="CONNECTION" />	
 	
 	<rabbit:admin connection-factory="connectionFactory" auto-startup="true"/>
 	
@@ -17,11 +19,8 @@
 	<rabbit:queue id="temperaturesQueue" name="temperatures" auto-delete="true" auto-declare="true" durable="false" />
 	<rabbit:queue id="repliesQueue" name="replies" auto-delete="true" auto-declare="true" durable="false" />
 	
-	<rabbit:listener-container connection-factory="connectionFactory" auto-startup="true" prefetch="20">
-		<rabbit:listener ref="mainContainerListener" queues="temperaturesQueue" />
-		
+	<rabbit:listener-container connection-factory="connectionFactory" auto-startup="true" concurrency="10" >
+		<rabbit:listener ref="mainContainerListener" queue-names="temperatures" />
 	</rabbit:listener-container>
 	
-	<bean id="mainContainerListener" class="com.estafet.pretoria.rabbit.config.ContextMessageListener">
-	</bean>
 </beans>
