@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:hz="http://www.hazelcast.com/schema/spring"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="  http://www.springframework.org/schema/beans
+						  http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+						  http://www.springframework.org/schema/mvc
+						  http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+						  http://www.springframework.org/schema/context
+						  http://www.springframework.org/schema/context/spring-context-3.2.xsd
+						  http://www.hazelcast.com/schema/spring
+						  http://www.hazelcast.com/schema/spring/hazelcast-spring-3.5.xsd">
+    
+	<context:annotation-config />
+	<context:component-scan base-package="com.estafet.test" />
+	<context:component-scan base-package="com.estafet.pretoria.storage" />
+	
+	<mvc:annotation-driven />
+
+	<!-- 	Hazelcast beans configuration start -->
+
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:/hazelcast-config.properties</value>
+            </list>
+        </property>
+    </bean>
+    
+    <hz:hazelcast id="instance">
+        <hz:config>
+        	<hz:spring-aware />
+            <hz:group name="${name}" password="${password}"/>
+            <hz:properties>
+<!--                 <hz:property name="hazelcast.merge.first.run.delay.seconds">5</hz:property> -->
+<!--                 <hz:property name="hazelcast.merge.next.run.delay.seconds">5</hz:property> -->
+            </hz:properties>
+            <hz:network port="${defaultPort}" port-auto-increment="true">
+                <hz:join>
+                    <hz:multicast enabled="true"/>
+                </hz:join>
+            </hz:network>
+
+        </hz:config>
+    </hz:hazelcast>
+
+	<hz:map id="map" instance-ref="client" name="map" scope="singleton"/>
+    <hz:client id="client">
+        <hz:group name="${name}" password="${password}"/>
+        <hz:network>
+            <hz:member>127.0.0.1:${defaultPort}</hz:member>
+        </hz:network>
+    </hz:client>
+
+	<!-- 	Hazelcast beans configuration end   -->
+
+	<bean id="cnManager"
+		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="favorPathExtension" value="true" />
+		<property name="ignoreAcceptHeader" value="true" />
+		<property name="defaultContentType" value="text/html" />
+		<property name="useJaf" value="false" />
+
+		<property name="mediaTypes">
+			<map>
+				<entry key="html" value="text/html" />
+				<entry key="json" value="application/json" />
+				<entry key="xml" value="application/xml" />
+			</map>
+		</property>
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+	  <property name="order" value="1" />
+	  <property name="contentNegotiationManager" ref="cnManager"/>
+	</bean>
+	
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+		<property name="order" value="2" />
+	</bean>
+
+</beans>
