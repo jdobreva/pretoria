@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,6 +40,9 @@ public class TestContextMessageListener {
 	 */
 	@Autowired
 	private RabbitTemplate amqpTemplate; 
+	
+	@Autowired
+	private RabbitAdmin rabbitAdmin; 
 	
 	@Autowired
 	private MockedContextMessageListener mainContainerListener;
@@ -66,7 +70,7 @@ public class TestContextMessageListener {
 			List<Message> messages = mainContainerListener.getMessageList();
 			assertNotNull(messages);
 			sendMessageToAQueue();
-			Thread.sleep(30000);
+			Thread.sleep(40000);
 			assertTrue(messages.size() > 0);
 		}catch(IOException ioe){
 			theLogger.error("IOE exception has occured: ", ioe);
@@ -84,13 +88,12 @@ public class TestContextMessageListener {
 	private void sendMessageToAQueue() throws IOException, TimeoutException {
 		theLogger.info("Entered preparing a message....");
 		amqpTemplate.setQueue("temperatures");
-		amqpTemplate.setExchange("direct");
 		
 		MessageProperties properties = new MessageProperties();
+		properties.setPriority(10);
 		Message message = new Message("10C".getBytes(), properties); 
-
-		amqpTemplate.send("STIdevice", message);
-		
+		//mainContainerListener.onMessage(message);
+		amqpTemplate.send("temperatures", message);
 	/*	Connection connection = connectionFactory.newConnection();
 		Channel channel = connection.createChannel();
 		channel.queueDeclare("temperatures", false, false, false, null);

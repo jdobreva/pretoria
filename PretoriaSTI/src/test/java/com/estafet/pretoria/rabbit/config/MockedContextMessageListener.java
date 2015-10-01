@@ -19,7 +19,7 @@ public class MockedContextMessageListener implements MessageListener {
 	
 	
 	public void onMessage(Message message){
-		LOGGER.debug("!!! A message received " + new String(message.getBody()));
+		LOGGER.info("!!! A message received " + new String(message.getBody()));
 		System.out.println("!!! A message received " + new String(message.getBody()));
 		messages.add(message);
 	}

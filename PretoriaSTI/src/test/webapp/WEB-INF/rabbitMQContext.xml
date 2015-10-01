@@ -8,7 +8,7 @@
            
 	<bean id="mainContainerListener" class="com.estafet.pretoria.rabbit.config.MockedContextMessageListener"/>
 
-	<rabbit:connection-factory id="connectionFactory" host="localhost" username="guest" password="guest" cache-mode="CONNECTION" />	
+	<rabbit:connection-factory id="connectionFactory" host="localhost" username="guest" password="guest" channel-cache-size="25" cache-mode="CONNECTION" />	
 	
 	<rabbit:admin connection-factory="connectionFactory" auto-startup="true"/>
 	
@@ -19,8 +19,26 @@
 	<rabbit:queue id="temperaturesQueue" name="temperatures" auto-delete="true" auto-declare="true" durable="false" />
 	<rabbit:queue id="repliesQueue" name="replies" auto-delete="true" auto-declare="true" durable="false" />
 	
-	<rabbit:listener-container connection-factory="connectionFactory" auto-startup="true" concurrency="10" >
-		<rabbit:listener ref="mainContainerListener" queue-names="temperatures" />
+	<rabbit:listener-container connection-factory="connectionFactory" auto-startup="true" prefetch="20">
+		<rabbit:listener ref="mainContainerListener" queues="temperaturesQueue" />
 	</rabbit:listener-container>
+	
+	<bean class="org.springframework.amqp.support.converter.Jackson2JsonMessageConverter">
+	<!-- if necessary, override the DefaultClassMapper -->
+		<property name="classMapper" ref="customClassMapper"/>
+	</bean>
+	
+	<bean class="org.springframework.amqp.support.converter.DefaultClassMapper">
+		<property name="defaultType" value="foo.PurchaseOrder"/>
+	</bean>
+	<!-- bean id="messageContainerListener" class="org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer">
+		<property name="connectionFactory" ref="connectionFactory"/>
+		<property name="messageListener" ref="mainContainerListener"/>
+		<property name="queueNames" value="temperatures"/>
+		<property name="acknowledgeMode" value="AUTO"/>
+		<property name="autoStartup" value="true"/>
+		<property name="rabbitAdmin" ref="rabbitAdmin"></property>
+		<property name="shutdownTimeout" value="30000"/>
+	</bean-->
 	
 </beans>
