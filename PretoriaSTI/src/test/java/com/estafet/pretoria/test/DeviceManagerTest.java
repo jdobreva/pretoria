@@ -21,8 +21,8 @@ import com.hazelcast.core.HazelcastInstance;
 public class DeviceManagerTest {
 
 	@Autowired
-	@Qualifier(value = "client")
-	private HazelcastInstance hazelcastClient;
+	@Qualifier(value="instance")
+	private HazelcastInstance hazelcastInstance;
 	
 	@Autowired
 	private DeviceManager deviceManager;
@@ -31,7 +31,7 @@ public class DeviceManagerTest {
 	
 	@Before
 	public void clearDeviceData(){
-		hazelcastClient.getMap("map").clear();
+		hazelcastInstance.getMap("map").clear();
 	}
 	
 	/*  Add device function tests  */
@@ -142,5 +142,35 @@ public class DeviceManagerTest {
 	@Test()
 	public void testGetDeviceWithUnknowId(){
 		assertNull("Error while getting device with unknown Id.", deviceManager.getDevice("UnknownId"));
+	}
+	
+	/*  Set device inactive function tests  */
+	@Test(expected=NullPointerException.class)
+	public void testSetDeviceInactiveWithNullParameter(){
+		deviceManager.setDeviceInactive(null);
+	}
+	
+	@Test()
+	public void testSetDeviceInactiveWithStrangeName(){
+		deviceManager.addDevice("#$DSWDNKASD*S asd as d8asbd 8asb");
+		assertTrue("Error while setting device inactive with strange name.", deviceManager.setDeviceInactive("#$DSWDNKASD*S asd as d8asbd 8asb"));
+		assertFalse("Error while setting device inactive with strange name.", deviceManager.getDevice("#$DSWDNKASD*S asd as d8asbd 8asb").isActive());
+	}
+	
+	@Test()
+	public void testSetDeviceInactive(){
+		deviceManager.addDevice(deviceId);
+		assertTrue("Error while setting device inactive with strange name.", deviceManager.setDeviceInactive(deviceId));
+		assertFalse("Error while setting device inactive with strange name.", deviceManager.getDevice(deviceId).isActive());
+	}
+	
+	@Test()
+	public void testSetDeviceInactiveWithUnknowId(){
+		assertFalse("Error while setting device inactive  with unknown Id.", deviceManager.setDeviceInactive("UnknownId"));
+	}
+	
+	@Test()
+	public void testGetDevicesMap(){
+		assertNotNull("Error retrieving devices map.", deviceManager.getDevicesMap());
 	}
 }

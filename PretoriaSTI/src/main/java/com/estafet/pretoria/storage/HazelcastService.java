@@ -19,17 +19,12 @@ public class HazelcastService {
 	private static final String mapName = "map";
 
 	@Autowired
-	@Qualifier(value = "instance")
+	@Qualifier(value="instance")
 	private HazelcastInstance hazelcastInstance;
-
-	@Autowired
-	@Qualifier(value = "client")
-	private HazelcastInstance hazelcastClient;
 
 	@PreDestroy
 	private void destroy() {
 		LOG.info("Performing hazelcast shutdown...");
-		hazelcastClient.shutdown();
 		hazelcastInstance.shutdown();
 		LOG.info("Hazelcast resources freed!");
 	}
@@ -67,6 +62,9 @@ public class HazelcastService {
 //		}
 		DeviceModel device = map.get(deviceId);
 		if (device != null) {
+			if(!device.isActive()){
+				device.setActive(true);
+			} 
 			device.getIndications().add(indication);
 
 			// hazelcast return copy of the DeviceModel object
@@ -90,7 +88,7 @@ public class HazelcastService {
 			LOG.warn("Device with id: " + deviceId + " already exists!");
 			return false;
 		} else {
-			map.put(deviceId, new DeviceModel(deviceId));
+			map.put(deviceId, new DeviceModel(deviceId, false));
 			return true;
 		}
 	}
@@ -125,6 +123,26 @@ public class HazelcastService {
 	}
 
 	private IMap<String, DeviceModel> getMap() {
-		return hazelcastClient.getMap(mapName);
+		return hazelcastInstance.getMap(mapName);
+	}
+
+	public boolean setDeviceInactive(String deviceId) {
+		if(deviceId == null){
+			throw new NullPointerException("Invalid deviceId value!");
+		}
+		IMap<String, DeviceModel> map = getMap();
+		DeviceModel device = map.get(deviceId);
+		if (device != null) {
+			device.setActive(false);
+			map.put(deviceId, device);
+			return true;
+		} else {
+			LOG.warn("Device with id: " + deviceId + " not found!");
+			return false;
+		}
+	}
+
+	public IMap<String, DeviceModel> getDevicesMap() {
+		return hazelcastInstance.getMap(mapName);
 	}
 }

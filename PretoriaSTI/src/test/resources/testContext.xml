@@ -20,11 +20,11 @@
 	<mvc:annotation-driven />
 
 	<!-- 	Hazelcast beans configuration start -->
-
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
                 <value>classpath:/hazelcast-config.properties</value>
+                <value>classpath:/application.properties</value>
             </list>
         </property>
     </bean>
@@ -32,28 +32,8 @@
     <hz:hazelcast id="instance">
         <hz:config>
         	<hz:spring-aware />
-            <hz:group name="${name}" password="${password}"/>
-            <hz:properties>
-<!--                 <hz:property name="hazelcast.merge.first.run.delay.seconds">5</hz:property> -->
-<!--                 <hz:property name="hazelcast.merge.next.run.delay.seconds">5</hz:property> -->
-            </hz:properties>
-            <hz:network port="${defaultPort}" port-auto-increment="true">
-                <hz:join>
-                    <hz:multicast enabled="true"/>
-                </hz:join>
-            </hz:network>
-
         </hz:config>
     </hz:hazelcast>
-
-	<hz:map id="map" instance-ref="client" name="map" scope="singleton"/>
-    <hz:client id="client">
-        <hz:group name="${name}" password="${password}"/>
-        <hz:network>
-            <hz:member>127.0.0.1:${defaultPort}</hz:member>
-        </hz:network>
-    </hz:client>
-
 	<!-- 	Hazelcast beans configuration end   -->
 
 	<bean id="cnManager"

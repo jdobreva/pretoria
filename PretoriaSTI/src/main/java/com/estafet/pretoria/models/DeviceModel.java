@@ -8,18 +8,14 @@ public class DeviceModel implements Serializable {
 
 	private static final long serialVersionUID = -2119229608746829210L;
 	private String deviceId;
+	private boolean active;
 	private List<IndicationModel> indications;
 	
-	public DeviceModel(String deviceId) {
+	public DeviceModel(String deviceId, boolean active) {
 		super();
 		this.deviceId = deviceId;
+		this.active = active;
 		List<IndicationModel> indications = new LinkedList<IndicationModel>();
-		this.indications = indications;
-	}
-	
-	public DeviceModel(String deviceId, List<IndicationModel> indications) {
-		super();
-		this.deviceId = deviceId;
 		this.indications = indications;
 	}
 	
@@ -35,6 +31,11 @@ public class DeviceModel implements Serializable {
 	public void setIndications(List<IndicationModel> indications) {
 		this.indications = indications;
 	}
-
+	public boolean isActive() {
+		return active;
+	}
+	public void setActive(boolean active) {
+		this.active = active;
+	}
 	
 }

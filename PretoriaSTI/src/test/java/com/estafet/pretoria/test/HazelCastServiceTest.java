@@ -19,9 +19,11 @@ import com.hazelcast.core.HazelcastInstance;
 @ContextConfiguration(locations = {"classpath:testContext.xml"})
 public class HazelCastServiceTest {
 
+
+
 	@Autowired
-	@Qualifier(value = "client")
-	private HazelcastInstance hazelcastClient;
+	@Qualifier(value="instance")
+	private HazelcastInstance hazelcastInstance;
 	
 	@Autowired
 	private HazelcastService hazelcastService;
@@ -30,7 +32,7 @@ public class HazelCastServiceTest {
 	
 	@Before
 	public void clearDeviceData(){
-		hazelcastClient.getMap("map").clear();
+		hazelcastInstance.getMap("map").clear();
 	}
 	
 	/*  Add device function tests  */
@@ -138,4 +140,35 @@ public class HazelCastServiceTest {
 	public void testGetDeviceWithUnknowId(){
 		assertNull("Error while getting device with unknown Id.", hazelcastService.getDevice("UnknownId"));
 	}
+	
+	/*  Set device inactive function tests  */
+	@Test(expected=NullPointerException.class)
+	public void testSetDeviceInactiveWithNullParameter(){
+		hazelcastService.setDeviceInactive(null);
+	}
+	
+	@Test()
+	public void testSetDeviceInactiveWithStrangeName(){
+		hazelcastService.addDevice("#$DSWDNKASD*S asd as d8asbd 8asb");
+		assertTrue("Error while setting device inactive with strange name.", hazelcastService.setDeviceInactive("#$DSWDNKASD*S asd as d8asbd 8asb"));
+		assertFalse("Error while setting device inactive with strange name.", hazelcastService.getDevice("#$DSWDNKASD*S asd as d8asbd 8asb").isActive());
+	}
+	
+	@Test()
+	public void testSetDeviceInactive(){
+		hazelcastService.addDevice(deviceId);
+		assertTrue("Error while setting device inactive with strange name.", hazelcastService.setDeviceInactive(deviceId));
+		assertFalse("Error while setting device inactive with strange name.", hazelcastService.getDevice(deviceId).isActive());
+	}
+	
+	@Test()
+	public void testSetDeviceInactiveWithUnknowId(){
+		assertFalse("Error while setting device inactive  with unknown Id.", hazelcastService.setDeviceInactive("UnknownId"));
+	}
+	
+	@Test()
+	public void testGetDevicesMap(){
+		assertNotNull("Error retrieving devices map.", hazelcastService.getDevicesMap());
+	}
+	
 }
